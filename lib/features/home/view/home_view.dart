@@ -1,48 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_e_commerce/features/home/bloc/bloc/home_bloc.dart';
-import 'package:flutter_e_commerce/features/home/model/product_model.dart';
-import 'package:flutter_e_commerce/features/home/service/product_service.dart';
-import 'package:flutter_e_commerce/product/network/product_network_manager.dart';
-import 'package:flutter_e_commerce/product/widget/dropdown_button.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import '../bloc/bloc/home_bloc.dart';
+import '../model/product_model.dart';
+import '../service/product_service.dart';
+import '../../../product/network/product_network_manager.dart';
+import '../../../product/state/base_view.dart';
 import 'package:kartal/kartal.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({Key? key}) : super(key: key);
 
   @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  late HomeBloc bloc;
-  @override
-  void initState() {
-    super.initState();
-    bloc = HomeBloc(ProductService(ProductNetworkManager()));
-    bloc.add(GetProducts());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            BlocBuilder<HomeBloc, HomeState>(
-              bloc: bloc,
-              builder: (context, state) {
-                if (state is HomeLoading) {
-                  return _buildLoadingWidget();
-                } else if (state is HomeLoaded) {
-                  return _buildLoadedWidget(context, state);
-                } else {
-                  return _buildErrorWidget();
-                }
-              },
-            )
-          ],
+    return BaseView<HomeBloc>(
+      viewModel: HomeBloc(ProductService(ProductNetworkManager())),
+      onModelReady: (model) {
+        model.add(GetProducts());
+      },
+      onPageBuilder: (BuildContext context, value) => Scaffold(
+        appBar: AppBar(),
+        body: LazyLoadScrollView(
+          onEndOfPage: () {
+            value.add(GetProducts());
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                BlocBuilder<HomeBloc, HomeState>(
+                  bloc: value,
+                  builder: (context, state) {
+                    if (state is HomeLoading) {
+                      return _buildLoadingWidget();
+                    } else if (state is HomeLoaded) {
+                      return _buildLoadedWidget(context, state);
+                    } else {
+                      return _buildErrorWidget();
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -61,7 +60,6 @@ class _HomeViewState extends State<HomeView> {
       width: context.dynamicWidth(1),
       height: context.dynamicHeight(1),
       child: ListView.builder(
-        reverse: true,
         itemCount: state.products.length,
         itemBuilder: (BuildContext context, int index) {
           ProductModel product = state.products[index];

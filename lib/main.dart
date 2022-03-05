@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_e_commerce/features/home/view/home_view.dart';
+
+import 'features/home/view/home_view.dart';
 
 void main() {
   runApp(const MyApp());

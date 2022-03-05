@@ -12,4 +12,9 @@ void main() {
     var response = await _productService.fetchAllProducts();
     expect(response, isNotEmpty);
   });
+
+  test("Test Fetch Limit Products", () async {
+    var response = await _productService.fetchLimitProducts();
+    expect(response!.length, 5);
+  });
 }
