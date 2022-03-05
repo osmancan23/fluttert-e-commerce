@@ -19,7 +19,10 @@ class HomeView extends StatelessWidget {
         model.add(GetProducts());
       },
       onPageBuilder: (BuildContext context, value) => Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          leading: Icon(Icons.menu),
+          title: TextField(),
+        ),
         body: LazyLoadScrollView(
           onEndOfPage: () {
             value.add(GetProducts());
@@ -33,6 +36,7 @@ class HomeView extends StatelessWidget {
                     if (state is HomeLoading) {
                       return _buildLoadingWidget();
                     } else if (state is HomeLoaded) {
+                      print(state.products.length);
                       return _buildLoadedWidget(context, state);
                     } else {
                       return _buildErrorWidget();
